@@ -1805,7 +1805,7 @@ main(int argc, char **argv)
 #ifdef ANDROID
 	/* Reuse system properties for a p2p interface */
 	char p2p_interface[PROPERTY_KEY_MAX];
-	switchUser();
+	//switchUser();
 #endif
 	closefrom(3);
 	openlog(PACKAGE, LOG_PERROR | LOG_PID, LOG_DAEMON);
