@@ -127,18 +127,17 @@ handle_ipv4ll_failure(void *arg)
 
 	if (iface->state->fail.s_addr == iface->addr.s_addr) {
 		up = uptime();
-		if (iface->state->defend + DEFEND_INTERVAL > up) {
+		/*if (iface->state->defend + DEFEND_INTERVAL > up) {*/
 			syslog(LOG_DEBUG,
-			    "%s: IPv4LL %d second defence failed",
-			    iface->name, DEFEND_INTERVAL);
+			    "IPv4LL give up defence, configure a new IPv4LL address");
 			drop_dhcp(iface, "EXPIRE");
 			iface->state->conflicts = -1;
-		} else {
-			syslog(LOG_DEBUG, "%s: defended IPv4LL address",
-			    iface->name);
-			iface->state->defend = up;
-			return;
-		}
+		/*} else {*/
+			/*syslog(LOG_DEBUG, "%s: defended IPv4LL address",*/
+				/*iface->name);*/
+			/*iface->state->defend = up;*/
+			/*return;*/
+		/*}*/
 	}
 
 	close_sockets(iface);
