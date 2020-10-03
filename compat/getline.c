@@ -1,4 +1,4 @@
-/* 
+/*
  * dhcpcd - DHCP client daemon
  * Copyright (c) 2006-2009 Roy Marples <roy@marples.name>
  * All rights reserved
@@ -43,19 +43,19 @@ getline(char ** __restrict buf, size_t * __restrict buflen,
 {
 	size_t bytes, newlen;
 	char *newbuf, *p;
-	
+
 	if (buf == NULL || buflen == NULL) {
 		errno = EINVAL;
 		return -1;
 	}
 	if (*buf == NULL)
 		*buflen = 0;
-	
+
 	bytes = 0;
 	do {
 		if (feof(fp))
 			break;
-		if (*buf == NULL || bytes != 0) {
+		if (*buf == NULL || bytes != 0 || *buflen < BUFSIZ) {
 			newlen = *buflen + BUFSIZ;
 			newbuf = realloc(*buf, newlen);
 			if (newbuf == NULL)

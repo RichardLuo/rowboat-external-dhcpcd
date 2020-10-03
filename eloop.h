@@ -1,6 +1,6 @@
-/* 
+/*
  * dhcpcd - DHCP client daemon
- * Copyright (c) 2006-2010 Roy Marples <roy@marples.name>
+ * Copyright (c) 2006-2015 Roy Marples <roy@marples.name>
  * All rights reserved
 
  * Redistribution and use in source and binary forms, with or without
@@ -30,22 +30,87 @@
 
 #include <time.h>
 
+#include "config.h"
+
 #ifndef ELOOP_QUEUE
-  #define ELOOP_QUEUE 0
+  #define ELOOP_QUEUE 1
 #endif
 
-#define add_timeout_tv(a, b, c) add_q_timeout_tv(ELOOP_QUEUE, a, b, c)
-#define add_timeout_sec(a, b, c) add_q_timeout_sec(ELOOP_QUEUE, a, b, c)
-#define delete_timeout(a, b) delete_q_timeout(ELOOP_QUEUE, a, b)
-#define delete_timeouts(a, ...) delete_q_timeouts(ELOOP_QUEUE, a, __VA_ARGS__)
+/* EXIT_FAILURE is a non zero value and EXIT_SUCCESS is zero.
+ * To add a CONTINUE definition, simply do the opposite of EXIT_FAILURE. */
+#define ELOOP_CONTINUE	-EXIT_FAILURE
 
-void add_event(int fd, void (*)(void *), void *);
-void delete_event(int fd);
-void add_q_timeout_sec(int queue, time_t, void (*)(void *), void *);
-void add_q_timeout_tv(int queue, const struct timeval *, void (*)(void *),
-    void *);
-void delete_q_timeout(int, void (*)(void *), void *);
-void delete_q_timeouts(int, void *, void (*)(void *), ...);
-void start_eloop(void);
+struct eloop_event {
+	TAILQ_ENTRY(eloop_event) next;
+	int fd;
+	void (*read_cb)(void *);
+	void *read_cb_arg;
+	void (*write_cb)(void *);
+	void *write_cb_arg;
+#if !defined(HAVE_KQUEUE) && !defined(HAVE_EPOLL)
+	struct pollfd *pollfd;
+#endif
+};
+
+struct eloop_timeout {
+	TAILQ_ENTRY(eloop_timeout) next;
+	struct timespec when;
+	void (*callback)(void *);
+	void *arg;
+	int queue;
+};
+
+struct eloop_ctx {
+	struct dhcpcd_ctx *ctx;
+
+	size_t events_len;
+	TAILQ_HEAD (event_head, eloop_event) events;
+	struct event_head free_events;
+
+	TAILQ_HEAD (timeout_head, eloop_timeout) timeouts;
+	struct timeout_head free_timeouts;
+
+	void (*timeout0)(void *);
+	void *timeout0_arg;
+
+#if defined(HAVE_KQUEUE) || defined(HAVE_EPOLL)
+	int poll_fd;
+#else
+	struct pollfd *fds;
+	size_t fds_len;
+#endif
+
+	int exitnow;
+	int exitcode;
+};
+
+#define eloop_timeout_add_tv(a, b, c, d) \
+    eloop_q_timeout_add_tv(a, ELOOP_QUEUE, b, c, d)
+#define eloop_timeout_add_sec(a, b, c, d) \
+    eloop_q_timeout_add_sec(a, ELOOP_QUEUE, b, c, d)
+#define eloop_timeout_delete(a, b, c) \
+    eloop_q_timeout_delete(a, ELOOP_QUEUE, b, c)
+
+int eloop_event_add(struct eloop_ctx *, int,
+    void (*)(void *), void *,
+    void (*)(void *), void *);
+void eloop_event_delete(struct eloop_ctx *, int, int);
+int eloop_q_timeout_add_sec(struct eloop_ctx *, int queue,
+    time_t, void (*)(void *), void *);
+int eloop_q_timeout_add_tv(struct eloop_ctx *, int queue,
+    const struct timespec *, void (*)(void *), void *);
+#if !defined(HAVE_KQUEUE)
+int eloop_timeout_add_now(struct eloop_ctx *, void (*)(void *), void *);
+#endif
+void eloop_q_timeout_delete(struct eloop_ctx *, int, void (*)(void *), void *);
+struct eloop_ctx * eloop_init(struct dhcpcd_ctx *);
+#if defined(HAVE_KQUEUE) || defined(HAVE_EPOLL)
+int eloop_requeue(struct eloop_ctx *);
+#else
+#define eloop_requeue(a) (0)
+#endif
+void eloop_free(struct eloop_ctx *);
+void eloop_exit(struct eloop_ctx *, int);
+int eloop_start(struct eloop_ctx *);
 
 #endif

@@ -1,18 +1,18 @@
 /* linux */
-#define SYSCONFDIR	"/system/etc/dhcpcd"
-#define SBINDIR		"/system/etc/dhcpcd"
-#define LIBEXECDIR	"/system/etc/dhcpcd"
-#define DBDIR		"/data/misc/dhcp"
-#define RUNDIR		"/data/misc/dhcp"
-#include "compat/arc4random.h"
+#define SYSCONFDIR	"/system/etc/dhcpcd-6.8.2"
+#define SBINDIR	"/system/etc/dhcpcd-6.8.2"
+#define LIBEXECDIR	"/system/etc/dhcpcd-6.8.2"
+#define DBDIR	"/data/misc/dhcp-6.8.2"
+#define RUNDIR	"/data/misc/dhcp-6.8.2"
+#define HAVE_EPOLL
+#ifndef NBBY
+#define NBBY  8
+#endif
 #include "compat/closefrom.h"
-#include "compat/strlcpy.h"
-#include "compat/getline.h"
+#include "compat/endian.h"
+#include "compat/posix_spawn.h"
+#include "compat/queue.h"
+#include "compat/strtoi.h"
 
-#ifndef MAX
-#define MAX(a,b)	((a) >= (b) ? (a) : (b))
-#endif
-
-#ifndef MIN
-#define MIN(a,b)	((a) <= (b) ? (a) : (b))
-#endif
+#include <signal.h>
+#include <linux/rtnetlink.h>

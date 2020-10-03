@@ -1,4 +1,4 @@
-/* 
+/*
  * dhcpcd - DHCP client daemon
  * Copyright (c) 2006-2009 Roy Marples <roy@marples.name>
  * All rights reserved
@@ -47,5 +47,6 @@ strlcpy(char *dst, const char *src, size_t size)
 		while (*src++);
 	}
 
-	return src - s - 1;
+
+	return (size_t)(src - s - 1);
 }

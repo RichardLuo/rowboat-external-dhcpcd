@@ -35,22 +35,24 @@ struct arc4_stream {
 	uint8_t i;
 	uint8_t j;
 	uint8_t s[256];
+	size_t count;
+	pid_t stir_pid;
 };
 
-static int rs_initialized;
-static struct arc4_stream rs;
-static int arc4_count;
+#define S(n) (n)
+#define S4(n) S(n), S(n + 1), S(n + 2), S(n + 3)
+#define S16(n) S4(n), S4(n + 4), S4(n + 8), S4(n + 12)
+#define S64(n) S16(n), S16(n + 16), S16(n + 32), S16(n + 48)
+#define S256 S64(0), S64(64), S64(128), S64(192)
 
-static void
-arc4_init(struct arc4_stream *as)
-{
-	int n;
+static struct arc4_stream rs = { .i = 0xff, .j = 0, .s = { S256 },
+                    .count = 0, .stir_pid = 0 };
 
-	for (n = 0; n < 256; n++)
-		as->s[n] = n;
-	as->i = 0;
-	as->j = 0;
-}
+#undef S
+#undef S4
+#undef S16
+#undef S64
+#undef S256
 
 static void
 arc4_addrandom(struct arc4_stream *as, unsigned char *dat, int datlen)
@@ -60,9 +62,9 @@ arc4_addrandom(struct arc4_stream *as, unsigned char *dat, int datlen)
 
 	as->i--;
 	for (n = 0; n < 256; n++) {
-		as->i = (as->i + 1);
+		as->i = (uint8_t)(as->i + 1);
 		si = as->s[as->i];
-		as->j = (as->j + si + dat[n % datlen]);
+		as->j = (uint8_t)(as->j + si + dat[n % datlen]);
 		as->s[as->i] = as->s[as->j];
 		as->s[as->j] = si;
 	}
@@ -74,9 +76,9 @@ arc4_getbyte(struct arc4_stream *as)
 {
 	uint8_t si, sj;
 
-	as->i = (as->i + 1);
+	as->i = (uint8_t)(as->i + 1);
 	si = as->s[as->i];
-	as->j = (as->j + si);
+	as->j = (uint8_t)(as->j + si);
 	sj = as->s[as->j];
 	as->s[as->i] = sj;
 	as->s[as->j] = si;
@@ -86,13 +88,13 @@ arc4_getbyte(struct arc4_stream *as)
 static uint32_t
 arc4_getword(struct arc4_stream *as)
 {
-	uint32_t val;
+	int val;
 
 	val = arc4_getbyte(as) << 24;
 	val |= arc4_getbyte(as) << 16;
 	val |= arc4_getbyte(as) << 8;
 	val |= arc4_getbyte(as);
-	return val;
+	return (uint32_t)val;
 }
 
 static void
@@ -104,12 +106,12 @@ arc4_stir(struct arc4_stream *as)
 		unsigned int rnd[(128 - sizeof(struct timeval)) /
 			sizeof(unsigned int)];
 	}       rdat;
-	int n;
+	size_t n;
 
 	gettimeofday(&rdat.tv, NULL);
 	fd = open("/dev/urandom", O_RDONLY);
 	if (fd != -1) {
-		n = read(fd, rdat.rnd, sizeof(rdat.rnd));
+		(void)read(fd, rdat.rnd, sizeof(rdat.rnd));
 		close(fd);
 	}
 
@@ -122,37 +124,28 @@ arc4_stir(struct arc4_stream *as)
 	 * paper "Weaknesses in the Key Scheduling Algorithm of RC4"
 	 * by Fluher, Mantin, and Shamir.  (N = 256 in our case.)
 	 */
-	for (n = 0; n < 256 * 4; n++)
+	for (n = 0; n < 256 * sizeof(uint32_t); n++)
 		arc4_getbyte(as);
-	arc4_count = 1600000;
+	as->count = 1600000;
 }
 
-void
-arc4random_stir()
+static void
+arc4_stir_if_needed(struct arc4_stream *as)
 {
+	pid_t pid;
 
-	if (!rs_initialized) {
-		arc4_init(&rs);
-		rs_initialized = 1;
-	}
-	arc4_stir(&rs);
-}
-
-void
-arc4random_addrandom(unsigned char *dat, int datlen)
-{
-
-	if (!rs_initialized)
-		arc4random_stir();
-	arc4_addrandom(&rs, dat, datlen);
+	pid = getpid();
+	if (as->count <= sizeof(uint32_t) || !as->stir_pid != pid) {
+		as->stir_pid = pid;
+		arc4_stir(as);
+	} else
+		as->count -= sizeof(uint32_t);
 }
 
 uint32_t
 arc4random()
 {
 
-	arc4_count -= 4;
-	if (!rs_initialized || arc4_count <= 0)
-		arc4random_stir();
+	arc4_stir_if_needed(&rs);
 	return arc4_getword(&rs);
 }
