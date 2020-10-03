@@ -64,7 +64,7 @@ posix_spawnattr_handle(const posix_spawnattr_t *attrp)
 		memset(&sa, 0, sizeof(sa));
 		sa.sa_handler = SIG_DFL;
 		for (i = 1; i < _NSIG; i++) {
-			if (sigismember(&attrp->posix_attr_sigdefault, i)) {
+			if (sigismember((sigset_t*)&attrp->posix_attr_sigdefault, i)) {
 				if (sigaction(i, &sa, NULL) == -1)
 					return -1;
 			}

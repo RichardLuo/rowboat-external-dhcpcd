@@ -226,7 +226,7 @@ ipv4ll_start(void *arg)
 		} else
 			memcpy(&seed, ifp->hwaddr + ifp->hwlen - sizeof(seed),
 			    sizeof(seed));
-		initstate(seed, state->randomstate, sizeof(state->randomstate));
+		/*initstate(seed, state->randomstate, sizeof(state->randomstate));*/
 	}
 
 	if ((astate = arp_new(ifp, NULL)) == NULL)
@@ -256,7 +256,7 @@ ipv4ll_start(void *arg)
 		return;
 	}
 
-	setstate(state->randomstate);
+	/*setstate(state->randomstate);*/
 	/* We maybe rebooting an IPv4LL address. */
 	if (!IN_LINKLOCAL(htonl(astate->addr.s_addr))) {
 		logger(ifp->ctx, LOG_INFO, "%s: probing for an IPv4LL address",

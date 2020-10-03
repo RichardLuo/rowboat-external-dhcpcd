@@ -253,11 +253,11 @@ logger(struct dhcpcd_ctx *ctx, int pri, const char *fmt, ...)
 			now = tv.tv_sec;
 			localtime_r(&now, &tmnow);
 			strftime(buf, sizeof(buf), "%b %d %T ", &tmnow);
-			dprintf(ctx->log_fd, "%s", buf);
+			printf("%s", buf);
 		}
 
-		vdprintf(ctx->log_fd, fmt, va);
-		dprintf(ctx->log_fd, "\n");
+		vprintf(fmt, va);
+		printf("\n");
 	} else
 		vsyslog(pri, fmt, va);
 	va_end(va);

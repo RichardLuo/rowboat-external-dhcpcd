@@ -1,4 +1,7 @@
 # dhcpcd Makefile
+deploy:
+	MM
+	adb push /home/rmd/projects/bbb_bsp/out/target/product/beagleboneblack/system/bin/dhcpcd-6.8.2 /
 
 PROG=		dhcpcd
 SRCS=		common.c control.c dhcpcd.c duid.c eloop.c

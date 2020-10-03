@@ -264,8 +264,8 @@ _open_link_socket(struct sockaddr_nl *nl, int flags, int protocol)
 	if (fd == -1)
 		return -1;
 	if (flags &&
-	    (flags = fcntl(fd, F_GETFD, 0)) == -1 ||
-	    fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1)
+	    ((flags = fcntl(fd, F_GETFD, 0)) == -1 ||
+	    fcntl(fd, F_SETFD, flags | FD_CLOEXEC) == -1))
 	{
 		close(fd);
 	        return -1;

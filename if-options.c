@@ -2068,10 +2068,10 @@ get_line(char ** __restrict buf, size_t * __restrict buflen,
     FILE * __restrict fp)
 {
 	char *p;
-	ssize_t bytes;
+	ssize_t bytes = -1;
 
 	do {
-		bytes = getline(buf, buflen, fp);
+		/*bytes = getline(buf, buflen, fp);*/
 		if (bytes == -1)
 			return NULL;
 		for (p = *buf; *p == ' ' || *p == '\t'; p++)

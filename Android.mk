@@ -18,7 +18,7 @@
 LOCAL_PATH := $(call my-dir)
 
 include $(CLEAR_VARS)
-LOCAL_MODULE := dhcpcd-6.8.2
+LOCAL_MODULE := dhcpcd
 LOCAL_SRC_FILES := \
     common.c \
     control.c \
@@ -54,12 +54,12 @@ endif
 
 LOCAL_CFLAGS += -D_BSD_SOURCE
 
-ifeq ($(DHCPCD_USE_IPV6), yes)
+#ifeq ($(DHCPCD_USE_IPV6), yes)
 LOCAL_SRC_FILES += ipv6.c ipv6nd.c dhcp6.c
 LOCAL_SRC_FILES += crypt/sha256.c
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/crypt
 LOCAL_CFLAGS += -DINET6
-endif
+#endif
 
 ifeq ($(DHCPCD_USE_DBUS), yes)
 LOCAL_SRC_FILES += dbus/dbus-dict.c dbus/rpc-dbus.c

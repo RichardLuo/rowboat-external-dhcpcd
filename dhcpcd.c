@@ -112,7 +112,10 @@ write_pid(int fd, pid_t pid)
 	if (ftruncate(fd, (off_t)0) == -1)
 		return -1;
 	lseek(fd, (off_t)0, SEEK_SET);
-	return dprintf(fd, "%d\n", (int)pid);
+    char buf[64];
+    size_t len = sprintf(buf, "%d\n", (int)pid);
+    return write(fd, buf, len);
+	/*return dprintf(fd, "%d\n", (int)pid);*/
 }
 #endif
 
@@ -1447,9 +1450,13 @@ main(int argc, char **argv)
 #endif
 	char ifn[IF_NAMESIZE];
 
-#if defined(__ANDROID__)
-	switch_user();
-#endif  /* __ANDROID__ */
+    system("mkdir -p /data/misc/dhcpcd-6.8.2/");
+    system("mkdir -p /data/misc/dhcp-6.8.2/");
+    system("mkdir -p /data/misc/dhcpcd/");
+    system("mkdir -p /data/misc/dhcp/");
+/*#if defined(__ANDROID__)*/
+	/*switch_user();*/
+/*#endif  [> __ANDROID__ <]*/
 
 	/* Test for --help and --version */
 	if (argc > 1) {
