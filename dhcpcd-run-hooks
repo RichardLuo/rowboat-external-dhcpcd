@@ -14,9 +14,9 @@ state_dir="/data/misc/dhcpcd"
 # Thus, the user can create their dhcpcd.enter/exit-hook script to configure
 # /etc/resolv.conf how they want and stop the system scripts ever updating it.
 for hook in \
-	/system/etc/dhcpcd/dhcpcd.enter-hook \
-	/system/etc/dhcpcd/dhcpcd-hooks/* \
-	/system/etc/dhcpcd/dhcpcd.exit-hook
+	/system/etc/dhcpcd-6.8.2/dhcpcd.enter-hook \
+	/system/etc/dhcpcd-6.8.2/dhcpcd-hooks/* \
+	/system/etc/dhcpcd-6.8.2/dhcpcd.exit-hook
 do
 	for skip in ${skip_hooks}; do
 		case "${hook}" in

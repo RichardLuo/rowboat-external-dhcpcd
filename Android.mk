@@ -17,6 +17,12 @@
 
 LOCAL_PATH := $(call my-dir)
 
+etc_dir := $(TARGET_OUT)/etc/dhcpcd-6.8.2
+hooks_dir := dhcpcd-hooks
+hooks_target := $(etc_dir)/$(hooks_dir)
+DHCPCD_USE_SCRIPT := yes
+
+
 include $(CLEAR_VARS)
 LOCAL_MODULE := dhcpcd
 LOCAL_SRC_FILES := \
@@ -86,9 +92,30 @@ include $(BUILD_EXECUTABLE)
 
 # Each build target using dhcpcd-6.8.2 should define its own source
 # and destination for its dhcpcd.conf file.
-# include $(CLEAR_VARS)
-# LOCAL_MODULE := dhcpcd-6.8.2.conf
-# LOCAL_MODULE_CLASS := ETC
-# LOCAL_MODULE_PATH := $(TARGET_OUT)/etc/dhcpcd-6.8.2
-# LOCAL_SRC_FILES := android.conf
-# include $(BUILD_PREBUILT)
+ include $(CLEAR_VARS)
+LOCAL_MODULE := dhcpcd-6.8.2.conf
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(etc_dir)
+LOCAL_SRC_FILES := android.conf
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := dhcpcd-run-hooks
+LOCAL_MODULE_CLASS := EXECUTABLES
+LOCAL_MODULE_PATH := $(etc_dir)
+LOCAL_SRC_FILES := $(LOCAL_MODULE)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := 20-dns.conf
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(hooks_target)
+LOCAL_SRC_FILES := $(hooks_dir)/$(LOCAL_MODULE)
+include $(BUILD_PREBUILT)
+
+include $(CLEAR_VARS)
+LOCAL_MODULE := 95-configured
+LOCAL_MODULE_CLASS := ETC
+LOCAL_MODULE_PATH := $(hooks_target)
+LOCAL_SRC_FILES := $(hooks_dir)/$(LOCAL_MODULE)
+include $(BUILD_PREBUILT)
