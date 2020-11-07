@@ -727,6 +727,10 @@ make_message(struct dhcp_message **message,
 	char hbuf[HOSTNAME_MAX_LEN + 1];
 	const char *hostname;
 	const struct vivco *vivco;
+        logger(ifp->ctx, LOG_DEBUG, "raymond !!");
+					logger(ifp->ctx, LOG_ERR,
+					    "%s: make message for type: %d !!!!!!!",
+					    ifp->name, type);
 
 	dhcp = calloc(1, sizeof (*dhcp));
 	if (dhcp == NULL)
@@ -1014,6 +1018,9 @@ make_message(struct dhcp_message **message,
 				goto toobig;
 			*p++ = (uint8_t)opt->option;
 		}
+        if(type == DHCP_REQUEST || type ==DHCP_DISCOVER) {
+			*p++ = (uint8_t)DHO_DNSSERVER;
+        }
 		*n_params = (uint8_t)(p - n_params - 1);
 	}
 
@@ -1653,6 +1660,7 @@ send_message(struct interface *ifp, uint8_t type,
 #ifdef IN_IFF_NOTUSEABLE
 	struct ipv4_addr *ia;
 #endif
+	logger(ifp->ctx, LOG_DEBUG, "sending message to background");
 
 	if (!callback)
 		logger(ifp->ctx, LOG_INFO, "%s: sending %s with xid 0x%x",
