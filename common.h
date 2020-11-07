@@ -159,16 +159,31 @@ int get_monotonic(struct timespec *);
  * syslog(3) interface.
  * However, this results in a ugly output on the command line
  * and relies on syslogd(8) starting before dhcpcd which is not
- * always the case. */
-#ifndef USE_LOGFILE
-# define USE_LOGFILE 1
-#endif
-#if USE_LOGFILE
-void logger_open(struct dhcpcd_ctx *);
-#define logger_mask(ctx, lvl) setlogmask((lvl))
-__printflike(3, 4) void logger(struct dhcpcd_ctx *, int, const char *, ...);
-void logger_close(struct dhcpcd_ctx *);
-#else
+j* always the case. */
+
+#ifdef REDIRECT_SYSLOG_TO_ANDROID_LOGCAT
+#define LOG_TAG "DHCPCD"
+#include <utils/Log.h>
+
+#undef LOG_EMERG
+#undef LOG_ALERT
+#undef LOG_CRIT
+#undef LOG_ERR
+#undef LOG_WARNING
+#undef LOG_NOTICE
+#undef LOG_INFO
+#undef LOG_DEBUG
+
+#define LOG_EMERG   ANDROID_LOG_FATAL
+#define LOG_ALERT   ANDROID_LOG_FATAL
+#define LOG_CRIT    ANDROID_LOG_FATAL
+#define LOG_ERR     ANDROID_LOG_ERROR
+#define LOG_WARNING ANDROID_LOG_WARN
+#define LOG_NOTICE  ANDROID_LOG_WARN
+#define LOG_INFO    ANDROID_LOG_INFO
+#define LOG_DEBUG   ANDROID_LOG_DEBUG
+#define syslog(a, b...) android_printLog(a, LOG_TAG, b)
+
 #define logger_open(ctx) openlog(PACKAGE, LOG_PERROR | LOG_PID, LOG_DAEMON)
 #define logger_mask(ctx, lvl) setlogmask((lvl))
 #define logger(ctx, pri, fmt, ...)			\
@@ -177,6 +192,11 @@ void logger_close(struct dhcpcd_ctx *);
 		syslog((pri), (fmt), ##__VA_ARGS__);	\
 	} while (0 /*CONSTCOND */)
 #define logger_close(ctx) closelog()
+#else
+void logger_open(struct dhcpcd_ctx *);
+#define logger_mask(ctx, lvl) setlogmask((lvl))
+__printflike(3, 4) void logger(struct dhcpcd_ctx *, int, const char *, ...);
+void logger_close(struct dhcpcd_ctx *);
 #endif
 
 ssize_t setvar(struct dhcpcd_ctx *,

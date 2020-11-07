@@ -26,31 +26,35 @@ DHCPCD_USE_SCRIPT := yes
 include $(CLEAR_VARS)
 LOCAL_MODULE := dhcpcd
 LOCAL_SRC_FILES := \
+    arp.c \
+    auth.c \
     common.c \
+    compat/closefrom.c \
+    compat/dprintf.c \
+    compat/getline.c \
+    compat/posix_spawn.c \
+    compat/pselect.c \
+    compat/strlcpy.c \
+    compat/strtoi.c \
     control.c \
+    crypt/hmac_md5.c \
+    crypt/md5.c \
+    dhcp.c \
     dhcpcd.c \
+    dhcpcd-embedded.c \
+    dhcp-common.c \
     duid.c \
     eloop.c \
+    ifaddrs.c \
     if.c \
-    if-options.c \
-    dhcp-common.c \
-    auth.c \
     if-linux.c \
     if-linux-wext.c \
-    arp.c \
-    dhcp.c \
+    if-options.c \
     ipv4.c \
-    ipv4ll.c \
-    ifaddrs.c \
-    crypt/md5.c \
-    crypt/hmac_md5.c \
-    compat/closefrom.c \
-    compat/strtoi.c \
-    dhcpcd-embedded.c \
-    compat/posix_spawn.c
+    ipv4ll.c
 
 # Always support IPv4.
-LOCAL_CFLAGS += -DINET -Wall -Werror -Wno-unused-variable
+LOCAL_CFLAGS += -DINET -Wall -Werror -Wno-unused-variable -DREDIRECT_SYSLOG_TO_ANDROID_LOGCAT
 
 ifeq ($(DHCPCD_USE_SCRIPT), yes)
 LOCAL_SRC_FILES += script.c

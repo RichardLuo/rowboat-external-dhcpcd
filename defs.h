@@ -40,10 +40,10 @@
 # define DEVDIR			LIBDIR "/" PACKAGE "/dev"
 #endif
 #ifndef DUID
-# define DUID			SYSCONFDIR "/" PACKAGE ".duid"
+# define DUID			DBDIR "/" PACKAGE ".duid"
 #endif
 #ifndef SECRET
-# define SECRET			SYSCONFDIR "/" PACKAGE ".secret"
+# define SECRET			DBDIR "/" PACKAGE ".secret"
 #endif
 #ifndef LEASEFILE
 # define LEASEFILE		DBDIR "/" PACKAGE "-%s%s%s.lease"
