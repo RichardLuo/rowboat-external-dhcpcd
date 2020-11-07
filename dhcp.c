@@ -727,10 +727,6 @@ make_message(struct dhcp_message **message,
 	char hbuf[HOSTNAME_MAX_LEN + 1];
 	const char *hostname;
 	const struct vivco *vivco;
-        logger(ifp->ctx, LOG_DEBUG, "raymond !!");
-					logger(ifp->ctx, LOG_ERR,
-					    "%s: make message for type: %d !!!!!!!",
-					    ifp->name, type);
 
 	dhcp = calloc(1, sizeof (*dhcp));
 	if (dhcp == NULL)
