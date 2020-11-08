@@ -32,4 +32,3 @@ RELEASE)
     setprop dhcp.${intf}.result "released"
     ;;
 esac
-echo "`date`:  ${intf} ${reason}" >> /data/log/logcat_dhcp.log
