@@ -1016,6 +1016,7 @@ make_message(struct dhcp_message **message,
 		}
         if(type == DHCP_REQUEST || type ==DHCP_DISCOVER) {
 			*p++ = (uint8_t)DHO_DNSSERVER;
+			*p++ = (uint8_t)DHO_NTPSERVER;
         }
 		*n_params = (uint8_t)(p - n_params - 1);
 	}
